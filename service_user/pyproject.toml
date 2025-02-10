@@ -100,6 +100,8 @@ select = [
   "RUF",
 ]
 ignore = [
+  "EM101",
+  "TRY003",
   "PGH003",
   "S101", # Use of assert detected https://docs.astral.sh/ruff/rules/assert/
   "RUF012", # Mutable class attributes should be annotated with `typing.ClassVar`

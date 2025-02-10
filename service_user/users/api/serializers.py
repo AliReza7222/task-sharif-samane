@@ -2,31 +2,27 @@ import re
 
 from rest_framework import serializers
 
-from users.models import User
+from users.user import User
 
 
-class UserCreateSerializer(serializers.ModelSerializer[User]):
-    password_confirmation = serializers.CharField(
-        write_only=True,
-        min_length=6,
-        required=True,
-    )
+class UserCreateSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255)
+    email = serializers.EmailField()
+    phone_number = serializers.CharField(max_length=50)
+    password = serializers.CharField(write_only=True, min_length=6)
+    password_confirmation = serializers.CharField(write_only=True, min_length=6)
 
-    class Meta:
-        model = User
-        fields = (
-            "id",
-            "name",
-            "email",
-            "phone_number",
-            "password",
-            "password_confirmation",
-        )
+    def validate_email(self, value):
+        if User.get_user_by_email(value):
+            raise serializers.ValidationError(
+                "This email is already registered.",
+            )
+        return value
 
     def validate_phone_number(self, value):
         if not re.fullmatch(r"^09[0-9]{9}$", value):
-            raise serializers.ValidationError(  # noqa: TRY003
-                "Enter a valid phone number starting with 09.",  # noqa: EM101
+            raise serializers.ValidationError(
+                "Enter a valid phone number starting with 09.",
             )
         return value
 
@@ -39,19 +35,17 @@ class UserCreateSerializer(serializers.ModelSerializer[User]):
 
     def create(self, validated_data):
         del validated_data["password_confirmation"]
-
-        user = User.objects.create_user(**validated_data)
-        user.is_staff = True
-        user.save()
-        return user
-
-
-class UserRetrieveSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = (
-            "id",
-            "name",
-            "email",
-            "phone_number",
+        user_id = User.create_user(
+            name=validated_data["name"],
+            email=validated_data["email"],
+            phone_number=validated_data["phone_number"],
+            password=validated_data["password"],
         )
+        return {"id": user_id, **validated_data}
+
+
+class UserRetrieveSerializer(serializers.Serializer):
+    _id = serializers.CharField()
+    name = serializers.CharField()
+    email = serializers.EmailField()
+    phone_number = serializers.CharField()
