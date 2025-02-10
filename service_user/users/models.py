@@ -10,7 +10,9 @@ class User(AbstractUser):
     phone_number = models.CharField(
         _("Phone number of User"),
         blank=True,
+        unique=True,
         max_length=50,
+        help_text=_("Enter a valid phone number starting with 09."),
     )
     first_name = None  # type: ignore[assignment]
     last_name = None  # type: ignore[assignment]
@@ -21,3 +23,6 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
 
     objects = UserManager()
+
+    def __str__(self):
+        return self.email
