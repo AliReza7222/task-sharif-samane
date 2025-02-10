@@ -41,11 +41,11 @@ class UserCreateSerializer(serializers.Serializer):
             phone_number=validated_data["phone_number"],
             password=validated_data["password"],
         )
-        return {"id": user_id, **validated_data}
+        return {"user_id": user_id, **validated_data}
 
 
 class UserRetrieveSerializer(serializers.Serializer):
-    _id = serializers.CharField()
+    user_id = serializers.CharField()
     name = serializers.CharField()
     email = serializers.EmailField()
     phone_number = serializers.CharField()
